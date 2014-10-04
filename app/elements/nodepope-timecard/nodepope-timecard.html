@@ -1,0 +1,133 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/paper-elements/paper-elements.html">
+
+
+<polymer-element name="nodepope-timecard" attributes="">
+  <template>
+    <link rel="stylesheet" href="nodepope-timecard.css">
+    <h1><content></content></h1>
+    <time>{{time}}</time>
+    <paper-fab id="toggler" isToggle mini icon="done" aria-label="{{nextClockState}}">{{nextClockState}}</paper-fab>
+  </template>
+  <script>
+    (function () {
+      'use strict';
+
+      var clockStates = ['stop','track'];
+
+      new Polymer({
+        ready: function() {
+          this.updateTime();
+
+          var $this = this;
+
+          this.$.toggler.addEventListener('click', function(){
+            $this.clockState = $this.nextStateIndex();
+            $this.nextClockState = $this.getClockState($this.nextStateIndex());
+
+            var events = {
+              track: function() {
+                $this.startClock();
+
+                $this.clockInterval = setInterval(function() {
+                  $this.updateTime();
+                }, 111);
+              },
+              stop: function() {
+
+                clearInterval($this.clockInterval);
+
+                $this.stopClock();
+              }
+            };
+
+            events[$this.getClockState()]();
+          });
+        },
+
+        // modelize this
+        entries: [],
+        clockState: 0,
+        trackedTime: 0,
+        time: 'Loading...',
+
+        startClock: function() {
+          this.entries.push({in: new Date()});
+        },
+        stopClock: function() {
+          var lastEntry = this.entries[this.entries.length-1];
+
+          lastEntry.out = new Date();
+
+          this.trackedTime = 0;
+
+          for(var i in this.entries) {
+            var entry = this.entries[i];
+
+            this.trackedTime += entry.out.getTime() - entry.in.getTime();
+          }
+
+          console.log(this.entries, this.trackedTime);
+        },
+
+        observe: {
+          trackedTime: 'updateTime'
+        },
+
+        updateTime: function(){
+          this.time = this.getTrackedTime();
+        },
+
+        nextStateIndex: function() {
+          return (this.clockState + 1) % clockStates.length;
+        },
+
+        getClockState: function() {
+          return clockStates[this.clockState];
+        },
+
+        getTrackedTime: function() {
+          var time = new Date(this.trackedTime + this.runningTime());
+
+          var timeString = pad(time.getUTCMinutes(), 2) + ':' + pad(time.getUTCSeconds(), 2);
+
+          if(time.getUTCHours() > 0) {
+            timeString = pad(time.getUTCHours(), 2) + ':' + timeString;
+          }
+
+          return  timeString;
+        },
+
+        nextClockState: 'track',
+
+        runningTime: function() {
+          var result = 0;
+
+          if(this.getClockState(this.clockState) === 'track' && this.entries.length) {
+            var lastEntry = this.entries[this.entries.length-1];
+
+            if(!lastEntry.out) {
+              result = this.trackedTime + new Date().getTime() - lastEntry.in.getTime();
+            }
+          }
+
+          return result;
+        },
+
+        clockInterval: null
+      });
+
+      function pad(n, len) {
+        var s = n.toString();
+        len = len || 2;
+
+        if (s.length < len) {
+          s = ('0000000000' + s).slice(-len);
+        }
+
+        return s;
+      }
+
+    })();
+  </script>
+</polymer-element>

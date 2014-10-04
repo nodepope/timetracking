@@ -1,0 +1,48 @@
+:host {
+  display: block;
+  background: #fff;
+  float: left;
+  margin: 1em;
+  padding: 1em 2em;
+
+  border: solid 1px;
+  border-color: #e81d62 rgb(225, 227, 229) rgb(225, 227, 229);
+  border-top-width: 3px;
+
+
+  text-align: center;
+
+  [icon=done] { background: #259b24; }
+
+  time {
+    font-size: 2em;
+    line-height: 2;
+    display: block;
+  }
+
+  button {
+    text-transform: capitalize;
+  }
+}
+
+:host([tracking]) {
+  border-color: green rgb(225, 227, 229) rgb(225, 227, 229);
+}
+
+:host([tracking]:hover) {
+  background-color: green;
+  border-color: green;
+}
+
+:host(:hover) {
+  cursor: pointer;
+  background-color: #e81d62;
+  border-color: rgb(178, 74, 125);
+}
+
+h1 {
+  font-size: .8em;
+  text-transform: uppercase;
+  color: #999;
+  margin: 0;
+}
